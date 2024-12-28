@@ -1,0 +1,80 @@
+package main
+
+import (
+ "fmt"
+ "math"
+)
+
+// Function to calculate the determinant of a matrix
+func determinant(matrix [][]float64) float64 {
+ n := len(matrix)
+ if n == 1 {
+  return matrix[0][0]
+ }
+ if n == 2 {
+  return matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0]
+ }
+
+ det := 0.0
+ for c := 0; c < n; c++ {
+  submatrix := make([][]float64, n-1)
+  for i := 1; i < n; i++ {
+   submatrix[i-1] = make([]float64, n-1)
+   for j := 0; j < n; j++ {
+    if j < c {
+     submatrix[i-1][j] = matrix[i][j]
+    } else if j > c {
+     submatrix[i-1][j-1] = matrix[i][j]
+    }
+   }
+  }
+  det += math.Pow(-1, float64(c)) * matrix[0][c] * determinant(submatrix)
+ }
+ return det
+}
+
+// Function to solve the system using Cramer's rule
+func cramer(A [][]float64, b []float64) []float64 {
+ n := len(b)
+ detA := determinant(A)
+
+ if detA == 0 {
+  return nil // No unique solution
+ }
+
+ x := make([]float64, n)
+ for i := 0; i < n; i++ {
+  Ai := make([][]float64, n)
+  for j := range A {
+   Ai[j] = make([]float64, n)
+   copy(Ai[j], A[j]) // Copy the original matrix
+  }
+  for j := 0; j < n; j++ {
+   Ai[j][i] = b[j] // Replace the i-th column with b
+  }
+  x[i] = determinant(Ai) / detA
+ }
+
+ return x
+}
+
+func main() {
+ // Example system of equations:
+ A := [][]float64{
+  {1, 2, 3},
+  {2, 3, 1},
+  {3, 1, 2},
+ }
+ b := []float64{9, 8, 7}
+
+ solution := cramer(A, b)
+
+ if solution != nil {
+  fmt.Println("Solution:")
+  for i, val := range solution {
+   fmt.Printf("x%d = %.2f\n", i+1, val)
+  }
+ } else {
+  fmt.Println("No unique solution exists.")
+ }
+}
