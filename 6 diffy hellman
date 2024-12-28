@@ -1,0 +1,64 @@
+package main
+
+import (
+ "fmt"
+ "math"
+ "math/rand"
+ "time"
+)
+
+// Function to check if a number is prime.
+func isPrime(num int) bool {
+ if num <= 1 {
+  return false
+ }
+ for i := 2; i <= int(math.Sqrt(float64(num))); i++ {
+  if num%i == 0 {
+   return false
+  }
+ }
+ return true
+}
+
+// Function to find a large prime number
+func findLargePrime() int {
+ for {
+  primeCandidate := rand.Intn(900) + 100 // Random number between 100 and 1000
+  if isPrime(primeCandidate) {
+   return primeCandidate
+  }
+ }
+}
+
+func main() {
+ rand.Seed(time.Now().UnixNano())
+
+ // Step 1: Choose a large prime number p and a generator g.
+ p := findLargePrime()
+ g := 2 // A common choice for g
+
+ // Step 2: Generate private keys for Alice and Bob.
+ aPrivate := rand.Intn(p-1) + 1 // Alice's private key
+ bPrivate := rand.Intn(p-1) + 1 // Bob's private key
+
+ // Step 3: Calculate public keys.
+ A_public := int(math.Mod(math.Pow(float64(g), float64(aPrivate)), float64(p))) // Alice's public key
+ B_public := int(math.Mod(math.Pow(float64(g), float64(bPrivate)), float64(p))) // Bob's public key
+
+ // Step 4: Generate the shared secret keys.
+ sharedSecretAlice := int(math.Mod(math.Pow(float64(B_public), float64(aPrivate)), float64(p))) // Alice's secret
+ sharedSecretBob := int(math.Mod(math.Pow(float64(A_public), float64(bPrivate)), float64(p)))     // Bob's secret
+
+ fmt.Printf("Prime p: %d\n", p)
+ fmt.Printf("Generator g: %d\n", g)
+ fmt.Printf("Alice's public key: %d\n", A_public)
+ fmt.Printf("Bob's public key: %d\n", B_public)
+ fmt.Printf("Alice's shared secret: %d\n", sharedSecretAlice)
+ fmt.Printf("Bob's shared secret: %d\n", sharedSecretBob)
+
+ if sharedSecretAlice == sharedSecretBob {
+  fmt.Println("Key exchange successful, both share the same secret.")
+ } else {
+  fmt.Println("Key exchange failed!")
+ }
+}
